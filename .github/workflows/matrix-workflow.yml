@@ -5,7 +5,7 @@ on:
 
 jobs:
   run-selenium-tests-ubuntu:
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         browser: [chrome]
@@ -26,6 +26,7 @@ jobs:
         os: ubuntu-latest
         browser: ${{ matrix.browser }}
         chrome-version: ${{ matrix.chrome-version }}
+        java-version: ${{ matrix.java-version }}
 
     - name: Set Selenium version
       run: echo "SELENIUM_VERSION=${{ matrix.selenium-version }}" >> $GITHUB_ENV
@@ -68,6 +69,7 @@ jobs:
         os: windows-latest
         browser: ${{ matrix.browser }}
         chrome-version: ${{ matrix.chrome-version }}
+        java-version: ${{ matrix.java-version }}
 
     - name: Set Selenium version
       run: echo "SELENIUM_VERSION=${{ matrix.selenium-version }}" >> $GITHUB_ENV

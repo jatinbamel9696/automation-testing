@@ -1,6 +1,23 @@
 name: Reusable Setup
 
-on: [workflow_call]
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      browser:
+        required: true
+        type: string
+      chrome-version:
+        required: false
+        type: string
+      firefox-version:
+        required: false
+        type: string
+      java-version:
+        required: true
+        type: string
 
 jobs:
   setup:
@@ -27,7 +44,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
 
-    - name: Install Browser
+    - name: Install Google Chrome
       if: ${{ inputs.browser == 'chrome' }}
       uses: browser-actions/setup-chrome@v1
       with:
