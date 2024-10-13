@@ -14,14 +14,8 @@ jobs:
         java-version: [17]
 
     steps:
-    - name: Checkout code from main branch
-      uses: actions/checkout@v4
-      with:
-        repository: jatinbamel9696/selenium-gradle
-        ref: main
-
     - name: Call Reusable Setup
-      uses: ./.github/workflows/reusable-setup.yml
+      uses: ./.github/workflows/reusable-setup.yml@main  # Specify branch if needed
       with:
         os: ubuntu-latest
         browser: ${{ matrix.browser }}
@@ -57,14 +51,8 @@ jobs:
         java-version: [17]
 
     steps:
-    - name: Checkout code from main branch
-      uses: actions/checkout@v4
-      with:
-        repository: jatinbamel9696/selenium-gradle
-        ref: main
-
     - name: Call Reusable Setup
-      uses: ./.github/workflows/reusable-setup.yml
+      uses: ./.github/workflows/reusable-setup.yml@main  # Specify branch if needed
       with:
         os: windows-latest
         browser: ${{ matrix.browser }}
