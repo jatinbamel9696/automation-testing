@@ -1,61 +1,96 @@
-name: Reusable Setup
+name: New Selenium Test Workflow
 
 on:
-  workflow_call:
-    inputs:
-      os:
-        required: true
-        type: string
-      browser:
-        required: true
-        type: string
-      chrome-version:
-        required: false
-        type: string
-      firefox-version:
-        required: false
-        type: string
-      java-version:
-        required: true
-        type: string
+  workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
-  setup:
-    runs-on: ${{ inputs.os }}
+  run-selenium-tests-ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: [chrome]
+        chrome-version: [latest, 129]
+        selenium-version: [4.26.0]
+        java-version: [17]
 
     steps:
-    - name: Checkout code
+    - name: Checkout code from main branch of the source repo
       uses: actions/checkout@v4
-
-    - name: Set up JDK
-      uses: actions/setup-java@v4
       with:
-        java-version: ${{ inputs.java-version }}
-        distribution: 'temurin'
-        cache: gradle
+        repository: jatinbamel9696/selenium-gradle
+        ref: main
 
-    - name: Cache Gradle packages
-      uses: actions/cache@v4
+    - name: Call Reusable Setup
+      uses: ./.github/workflows/reusable-setup.yml@main
       with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
+        os: ubuntu-latest
+        browser: ${{ matrix.browser }}
+        chrome-version: ${{ matrix.chrome-version }}
+        java-version: ${{ matrix.java-version }}
 
-    - name: Install Google Chrome
-      if: ${{ inputs.browser == 'chrome' }}
-      uses: browser-actions/setup-chrome@v1
+    - name: Set Selenium version
+      run: echo "SELENIUM_VERSION=${{ matrix.selenium-version }}" >> $GITHUB_ENV
+
+    - name: Run Selenium tests
+      run: |
+        cd selenium-test-project
+        echo "Running tests in headless mode on Linux..."
+        ./gradlew clean test -Dheadless=true -DseleniumVersion=${{ env.SELENIUM_VERSION }}
+
+    - name: Upload Test Reports
+      uses: actions/upload-artifact@v4
       with:
-        chrome-version: ${{ inputs.chrome-version }}
-        install-chromedriver: true
+        name: test-reports-ubuntu-${{ github.run_id }}-${{ matrix.browser }}-${{ matrix.java-version }}-${{ matrix.headless }}
+        path: build/test-results/reports
+        if-no-files-found: warn
+        compression-level: 6
+        overwrite: true
+        include-hidden-files: true
 
-    - name: Install Firefox
-      if: ${{ inputs.browser == 'firefox' }}
-      uses: browser-actions/setup-firefox@v1
+  run-selenium-tests-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        browser: [chrome]
+        chrome-version: [latest, 129]
+        selenium-version: [4.26.0]
+        java-version: [17]
+
+    steps:
+
+    - name: Checkout code from main branch of the source repo
+      uses: actions/checkout@v4
+      
+    - name: Checkout code from main branch of the source repo
+      uses: actions/checkout@v4
       with:
-        firefox-version: ${{ inputs.firefox-version }}
+        repository: jatinbamel9696/selenium-gradle
+        ref: main
 
-    - name: Set permissions for gradlew
-      run: chmod +x selenium-test-project/gradlew
+    - name: Call Reusable Setup
+      uses: ./.github/workflows/reusable-setup.yml@main
+      with:
+        os: windows-latest
+        browser: ${{ matrix.browser }}
+        chrome-version: ${{ matrix.chrome-version }}
+        java-version: ${{ matrix.java-version }}
+
+    - name: Set Selenium version
+      run: echo "SELENIUM_VERSION=${{ matrix.selenium-version }}" >> $GITHUB_ENV
+
+    - name: Run Selenium tests
+      shell: cmd
+      run: |
+        cd selenium-test-project
+        echo "Running tests in normal mode on Windows..."
+        gradlew.bat clean test -Dheadless=false -DseleniumVersion=${{ env.SELENIUM_VERSION }}
+
+    - name: Upload Test Reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-reports-windows-${{ github.run_id }}-${{ matrix.browser }}-${{ matrix.java-version }}-${{ matrix.headless }}
+        path: build/test-results/reports
+        if-no-files-found: warn
+        compression-level: 6
+        overwrite: true
+        include-hidden-files: true

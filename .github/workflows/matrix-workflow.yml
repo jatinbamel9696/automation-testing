@@ -14,38 +14,21 @@ jobs:
         java-version: [17]
 
     steps:
-    - name: Checkout code from main branch
+    - name: Checkout code from main branch of the source repo
       uses: actions/checkout@v4
       with:
         repository: jatinbamel9696/selenium-gradle
         ref: main
 
-    - name: Call Reusable Setup
-      uses: ./.github/workflows/reusable-setup.yml@main  # Specifying the reusable workflow
+    - name: Call Reusable Selenium Test Workflow
+      uses: ./.github/workflows/reusable-setup.yml  # Direct path to the reusable workflow
       with:
         os: ubuntu-latest
         browser: ${{ matrix.browser }}
         chrome-version: ${{ matrix.chrome-version }}
         java-version: ${{ matrix.java-version }}
-
-    - name: Set Selenium version
-      run: echo "SELENIUM_VERSION=${{ matrix.selenium-version }}" >> $GITHUB_ENV
-
-    - name: Run Selenium tests
-      run: |
-        cd selenium-test-project
-        echo "Running tests in headless mode on Linux..."
-        ./gradlew clean test -Dheadless=true -DseleniumVersion=${{ env.SELENIUM_VERSION }}
-
-    - name: Upload Test Reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-reports-ubuntu-${{ github.run_id }}-${{ matrix.browser }}-${{ matrix.java-version }}-${{ matrix.headless }}
-        path: build/test-results/reports
-        if-no-files-found: warn
-        compression-level: 6
-        overwrite: true
-        include-hidden-files: true
+        selenium-version: ${{ matrix.selenium-version }}
+        headless: true
 
   run-selenium-tests-windows:
     runs-on: windows-latest
@@ -57,36 +40,18 @@ jobs:
         java-version: [17]
 
     steps:
-    - name: Checkout code from main branch
+    - name: Checkout code from main branch of the source repo
       uses: actions/checkout@v4
       with:
         repository: jatinbamel9696/selenium-gradle
         ref: main
 
-    - name: Call Reusable Setup
-      uses: ./.github/workflows/reusable-setup.yml@main  # Specifying the reusable workflow
+    - name: Call Reusable Selenium Test Workflow
+      uses: ./.github/workflows/reusable-setup.yml  # Direct path to the reusable workflow
       with:
         os: windows-latest
         browser: ${{ matrix.browser }}
         chrome-version: ${{ matrix.chrome-version }}
         java-version: ${{ matrix.java-version }}
-
-    - name: Set Selenium version
-      run: echo "SELENIUM_VERSION=${{ matrix.selenium-version }}" >> $GITHUB_ENV
-
-    - name: Run Selenium tests
-      shell: cmd
-      run: |
-        cd selenium-test-project
-        echo "Running tests in normal mode on Windows..."
-        gradlew.bat clean test -Dheadless=false -DseleniumVersion=${{ env.SELENIUM_VERSION }}
-
-    - name: Upload Test Reports
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-reports-windows-${{ github.run_id }}-${{ matrix.browser }}-${{ matrix.java-version }}-${{ matrix.headless }}
-        path: build/test-results/reports
-        if-no-files-found: warn
-        compression-level: 6
-        overwrite: true
-        include-hidden-files: true
+        selenium-version: ${{ matrix.selenium-version }}
+        headless: false
