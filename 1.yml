@@ -1,0 +1,14 @@
+name: First Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run_first_job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Echo message in 1.yml
+      run: echo "This is the first workflow (1.yml)"

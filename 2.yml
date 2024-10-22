@@ -1,0 +1,20 @@
+name: Second Workflow (After 2 hours)
+
+on:
+  workflow_run:
+    workflows: ["First Workflow"]  # This should match the `name` field in `1.yml`
+    types:
+      - completed
+
+jobs:
+  wait_and_echo:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Wait for 2 hours (7200 seconds)
+    - name: Wait for 5 min
+      run: sleep 300
+      
+    # Step 2: Echo message in 2.yml
+    - name: Echo message in 2.yml
+      run: echo "This is the second workflow (2.yml) running 5 min after the first workflow"
